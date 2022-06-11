@@ -142,7 +142,7 @@ def train_page(st, **state):
     
     #MultiPage.save({'df':df, "item_dfty": item_dfty, "theta": theta})
     ret = {'df':df, "item_dfty": item_dfty, "theta": theta}
-    for k, v in ret:
+    for k, v in ret.items():
         joblib.dump(v, '%s.pkl' % k)
 
     
@@ -234,7 +234,8 @@ def predict_page(st, **state):
     #     st.warning("Go to the train Page firstly")
     #     return
     state={}
-    for k, v in ret:
+    ret = ['df', "item_dfty", "theta"]
+    for k in ret:
         state[k] = joblib.load('%s.pkl' % k)
         
     df = state['df'].reset_index()
