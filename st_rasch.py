@@ -15,9 +15,9 @@ st.set_page_config(page_title="rasch IRT demo", page_icon=" ️", layout="center
 import utils as UT
 import random
 import math
-import chart_studio
-chart_studio.tools.set_credentials_file(username='xuzhenhua', api_key='cH74AtkJFsdgQejTCVnk')
-import chart_studio.plotly as py
+# import chart_studio
+# chart_studio.tools.set_credentials_file(username='xuzhenhua', api_key='cH74AtkJFsdgQejTCVnk')
+# import chart_studio.plotly as py
 from plotly.graph_objects import Scatter, Layout, Figure
 from streamlit_multipage import MultiPage
 
