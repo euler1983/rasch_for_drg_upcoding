@@ -233,6 +233,10 @@ def predict_page(st, **state):
     # if "df" not in state or "item_dfty" not in state or 'theta' not in state:
     #     st.warning("Go to the train Page firstly")
     #     return
+    if os.path.exists('df.pkl') == False:
+        st.warning('Go to the train Page firstly')
+        return
+    
     state={}
     ret = ['df', "item_dfty", "theta"]
     for k in ret:
