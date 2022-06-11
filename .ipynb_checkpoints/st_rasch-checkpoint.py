@@ -138,6 +138,7 @@ def train_page(st, **state):
     sns.lineplot(data=item_dfty, x="index", y="value")   
     plt.xticks(rotation=20, ha='right', fontsize=7)
     plt.grid(color='silver')
+    plt.title('item difficulty estimation')
     st.pyplot(fig)
     
     #MultiPage.save({'df':df, "item_dfty": item_dfty, "theta": theta})
@@ -176,6 +177,7 @@ def cat_test(case_df, item_dfty, init_theta):
     flag = 0
     
     rid = 0
+    st.header('CAT process')
     while len(col_list) > 0:
         st.text('*'*40)
         st.text('round:%d' % rid)
