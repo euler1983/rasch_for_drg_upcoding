@@ -21,7 +21,7 @@ import math
 from plotly.graph_objects import Scatter, Layout, Figure
 from streamlit_multipage import MultiPage
 import joblib
-
+import os
 
 def model_setup(df):
     '''rasch model solve
