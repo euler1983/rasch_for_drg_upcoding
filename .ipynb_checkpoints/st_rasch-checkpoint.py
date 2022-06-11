@@ -6,9 +6,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 plt.rc("font",family="SimHei") ###增加了这一行
 st.set_option('deprecation.showPyplotGlobalUse', False)
-import igraph as ig
-from matplotlib.artist import Artist
-from igraph import BoundingBox, Graph, palettes
+#import igraph as ig
+#from matplotlib.artist import Artist
+#from igraph import BoundingBox, Graph, palettes
 import streamlit.components.v1 as components
 from st_aggrid import AgGrid, DataReturnMode, GridUpdateMode, GridOptionsBuilder
 st.set_page_config(page_title="rasch IRT demo", page_icon=" ️", layout="centered")
