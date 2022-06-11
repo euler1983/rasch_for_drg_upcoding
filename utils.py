@@ -1,15 +1,11 @@
-import matplotlib as mpl
-mpl.use('cairo')
-
-import altair as alt
 import streamlit as st
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 st.set_option('deprecation.showPyplotGlobalUse', False)
-import igraph as ig
-from matplotlib.artist import Artist
-from igraph import BoundingBox, Graph, palettes
+#import igraph as ig
+#from matplotlib.artist import Artist
+#from igraph import BoundingBox, Graph, palettes
 import streamlit.components.v1 as components
 from st_aggrid import AgGrid, DataReturnMode, GridUpdateMode, GridOptionsBuilder
  
