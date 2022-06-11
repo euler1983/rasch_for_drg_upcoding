@@ -20,7 +20,7 @@ import math
 # import chart_studio.plotly as py
 from plotly.graph_objects import Scatter, Layout, Figure
 from streamlit_multipage import MultiPage
-
+import joblib
 
 
 def model_setup(df):
@@ -140,7 +140,10 @@ def train_page(st, **state):
     plt.grid(color='silver')
     st.pyplot(fig)
     
-    MultiPage.save({'df':df, "item_dfty": item_dfty, "theta": theta})
+    #MultiPage.save({'df':df, "item_dfty": item_dfty, "theta": theta})
+    ret = {'df':df, "item_dfty": item_dfty, "theta": theta}
+    for k, v in ret:
+        joblib.dump(v, '%s.pkl' % k)
 
     
     
@@ -227,9 +230,13 @@ def cat_test(case_df, item_dfty, init_theta):
 
 
 def predict_page(st, **state):
-    if "df" not in state or "item_dfty" not in state or 'theta' not in state:
-        st.warning("Go to the train Page firstly")
-        return
+    # if "df" not in state or "item_dfty" not in state or 'theta' not in state:
+    #     st.warning("Go to the train Page firstly")
+    #     return
+    state={}
+    for k, v in ret:
+        state[k] = joblib.load('%s.pkl' % k)
+        
     df = state['df'].reset_index()
     item_dfty = state['item_dfty']
     theta = state['theta']
