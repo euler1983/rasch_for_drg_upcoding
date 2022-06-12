@@ -91,7 +91,7 @@ def model_setup(df):
             # new delta = delta - residual / variance
             new_delta.append(n - df_delta.iloc[:, counter_2].sum() / df_var.iloc[:, counter_2].sum())
             counter_2 = counter_2 + 1
-        delta = np.array(new_delta) - np.array(new_delta).mean()
+        #delta = np.array(new_delta) - np.array(new_delta).mean()
         
         var_sum_new = (df_delta.applymap(lambda x: x * x).sum()).sum()
         # 设定第一终点，减少的方差小于0.05

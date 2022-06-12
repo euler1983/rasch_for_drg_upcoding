@@ -6,22 +6,22 @@ import pandas as pd
 import matplotlib.pyplot as plt
 plt.rc("font",family="SimHei") ###增加了这一行
 st.set_option('deprecation.showPyplotGlobalUse', False)
-#import igraph as ig
-#from matplotlib.artist import Artist
-#from igraph import BoundingBox, Graph, palettes
+import igraph as ig
+from matplotlib.artist import Artist
+from igraph import BoundingBox, Graph, palettes
 import streamlit.components.v1 as components
 from st_aggrid import AgGrid, DataReturnMode, GridUpdateMode, GridOptionsBuilder
 st.set_page_config(page_title="rasch IRT demo", page_icon=" ️", layout="centered")
 import utils as UT
 import random
 import math
-# import chart_studio
-# chart_studio.tools.set_credentials_file(username='xuzhenhua', api_key='cH74AtkJFsdgQejTCVnk')
-# import chart_studio.plotly as py
+import chart_studio
+chart_studio.tools.set_credentials_file(username='xuzhenhua', api_key='cH74AtkJFsdgQejTCVnk')
+import chart_studio.plotly as py
 from plotly.graph_objects import Scatter, Layout, Figure
 from streamlit_multipage import MultiPage
-import joblib
-import os
+
+
 
 def model_setup(df):
     '''rasch model solve
@@ -91,7 +91,8 @@ def model_setup(df):
             # new delta = delta - residual / variance
             new_delta.append(n - df_delta.iloc[:, counter_2].sum() / df_var.iloc[:, counter_2].sum())
             counter_2 = counter_2 + 1
-        delta = np.array(new_delta) - np.array(new_delta).mean()
+        #delta = np.array(new_delta) - np.array(new_delta).mean()
+        delta = new_delta
         
         var_sum_new = (df_delta.applymap(lambda x: x * x).sum()).sum()
         # 设定第一终点，减少的方差小于0.05
@@ -138,13 +139,9 @@ def train_page(st, **state):
     sns.lineplot(data=item_dfty, x="index", y="value")   
     plt.xticks(rotation=20, ha='right', fontsize=7)
     plt.grid(color='silver')
-    plt.title('item difficulty estimation')
     st.pyplot(fig)
     
-    #MultiPage.save({'df':df, "item_dfty": item_dfty, "theta": theta})
-    ret = {'df':df, "item_dfty": item_dfty, "theta": theta}
-    for k, v in ret.items():
-        joblib.dump(v, '%s.pkl' % k)
+    MultiPage.save({'df':df, "item_dfty": item_dfty, "theta": theta})
 
     
     
@@ -175,9 +172,10 @@ def cat_test(case_df, item_dfty, init_theta):
     item_z = {}
     theta = init_theta
     flag = 0
+    theta_list = []
+    item_dfty = []
     
     rid = 0
-    st.header('CAT process')
     while len(col_list) > 0:
         st.text('*'*40)
         st.text('round:%d' % rid)
@@ -186,14 +184,14 @@ def cat_test(case_df, item_dfty, init_theta):
         item_dict = dict(zip(col_list, key_used.loc[col_list, 'value']))
         item, item_value = get_closest_item(theta, item_dict)
         st.text('1. theta:%4.2f, most closest item: %s (%4.2f)' % (theta, item, item_value))
-        
+       
         col_list.remove(item)
         
         # 归一化：变成[0,1]之间的概率
         pct_i = (case_df.loc[0, item] - key_used.loc[item, 'min']) / (key_used.loc[item, 'max'] - key_used.loc[item, 'min'])
         # pct_i = min(pct_i, 1)
         # pct_i = max(pct_i, 0)
-        st.text('2. item fee normalization: %4.2f->%4.2f' % (case_df.loc[0, item], pct_i))
+        st.text('2. item fee normalization: %4.4f->%4.4f' % (case_df.loc[0, item], pct_i))
         
         # 计算个体z值
         # 计算个体难度与项目难度之间的差异
@@ -211,39 +209,34 @@ def cat_test(case_df, item_dfty, init_theta):
         st.text('4. z=%4.2f' % z)
         
         item_z[item] = round(z, 2)
+        theta_list.append(theta)
+        item_dfty.append(item_value)
         
+        # 如果z值在合理范围内，更新theta。否则不更新theta。
         # 计算总体theta值: theta = theta + residual / variance
-        old_theta = theta
-        theta = theta + (pct_i - p) / (p * (1 - p))
-        st.text('5. new theta(%4.2f) = theta(%4.2f) + residual(%4.2f) / variance(%4.2f)' % (theta, old_theta, (pct_i - p), (p * (1 - p))))
-
+        if abs(z) < 3:
+            old_theta = theta
+            theta = theta + (pct_i - p) / (p * (1 - p))
+            st.text('5. new theta(%4.2f) = theta(%4.2f) + residual(%4.2f) / variance(%4.2f)' % (theta, old_theta, (pct_i - p), (p * (1 - p))))
     
+        
     z_list = list(item_z.values())
     theta = round(theta, 2)
-
+    
  
     for i in z_list:
         if abs(i) > 2:
             ret = 'RED Label'
     ret = 'Normal'
     
-    return item_z, theta, ret
+    return item_z, theta, ret, theta_list, item_dfty
 
 
 
 def predict_page(st, **state):
-    # if "df" not in state or "item_dfty" not in state or 'theta' not in state:
-    #     st.warning("Go to the train Page firstly")
-    #     return
-    if os.path.exists('df.pkl') == False:
-        st.warning('Go to the train Page firstly')
+    if "df" not in state or "item_dfty" not in state or 'theta' not in state:
+        st.warning("Go to the train Page firstly")
         return
-    
-    state={}
-    ret = ['df', "item_dfty", "theta"]
-    for k in ret:
-        state[k] = joblib.load('%s.pkl' % k)
-        
     df = state['df'].reset_index()
     item_dfty = state['item_dfty']
     theta = state['theta']
@@ -265,8 +258,10 @@ def predict_page(st, **state):
     case_show = case_show.merge(item_dfty, on = 'index', how='left')
     
     UT.ag_df(st, case_show, height=500, selectable=False)
-    init_theta = 0#np.mean(theta)
-    item_z, theta, ret = cat_test(case_df, item_dfty, init_theta)
+    init_theta = np.mean(theta)
+    
+    st.header('利用CAT计算每个项目的Z值')
+    item_z, theta, ret, theta_list, item_dfty = cat_test(case_df, item_dfty, init_theta)
 
     st.header('rasch模型预测结果')
     st.info('当前病案: %s' % ret)
@@ -276,8 +271,38 @@ def predict_page(st, **state):
         item_z[k] = [v]
     item_df = pd.DataFrame(item_z).T.rename(columns={0:'z_score'})
 
-
-    # 绘图    
+    # 图1：item与theta变化曲线
+    trace0 = Scatter(
+        x=list(range(len(theta_list))),
+        y=theta_list,
+        name='theta',
+        mode='markers+lines',
+        marker=dict(
+            size=10,    # 设置点的宽度
+            color='rgba(0, 0, 200, 0.8)',   # 设置点的颜色
+            ),
+        )    
+    trace1 = Scatter(
+        x=list(range(len(theta_list))),
+        y=item_dfty,
+        name='item',
+        mode='markers+lines',
+        marker=dict(
+            size=10,    # 设置点的宽度
+            color='rgba(152, 0, 0, 0.8)',   # 设置点的颜色
+            ),
+        )       
+    data = [trace0, trace1]
+    layout = Layout(
+        title='Styled Scatter',
+        yaxis=dict(zeroline=True),  # 显示y轴的0刻度线
+        xaxis=dict(zeroline=False, tickmode='array', tickvals = list(range(len(item_df))), ticktext = item_df.index.tolist())  # 不显示x轴的0刻度线
+        )
+    fig = Figure(data, layout=layout)
+    st.plotly_chart(fig, filename='CAT计算过程')
+    
+    
+    # 图2：每个项目的结果图   
     trace0 = Scatter(
         x=list(range(len(item_df))),
         y=item_df['z_score'],
