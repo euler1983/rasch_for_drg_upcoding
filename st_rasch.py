@@ -6,18 +6,18 @@ import pandas as pd
 import matplotlib.pyplot as plt
 plt.rc("font",family="SimHei") ###增加了这一行
 st.set_option('deprecation.showPyplotGlobalUse', False)
-import igraph as ig
+#import igraph as ig
 from matplotlib.artist import Artist
-from igraph import BoundingBox, Graph, palettes
+#from igraph import BoundingBox, Graph, palettes
 import streamlit.components.v1 as components
 from st_aggrid import AgGrid, DataReturnMode, GridUpdateMode, GridOptionsBuilder
 st.set_page_config(page_title="rasch IRT demo", page_icon=" ️", layout="centered")
 import utils as UT
 import random
 import math
-import chart_studio
-chart_studio.tools.set_credentials_file(username='xuzhenhua', api_key='cH74AtkJFsdgQejTCVnk')
-import chart_studio.plotly as py
+#import chart_studio
+#chart_studio.tools.set_credentials_file(username='xuzhenhua', api_key='cH74AtkJFsdgQejTCVnk')
+#import chart_studio.plotly as py
 from plotly.graph_objects import Scatter, Layout, Figure
 from streamlit_multipage import MultiPage
 
